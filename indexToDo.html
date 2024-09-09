@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hey Jasper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(to bottom right, #e0f2fe, #e0e7ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            background-color: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #3b82f6;
+            color: white;
+            padding: 24px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 24px;
+        }
+        .add-task-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 18px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .add-task-btn:hover {
+            background-color: #2563eb;
+            transform: scale(1.05);
+        }
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 24px;
+        }
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background-color: #f3f4f6;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .task-item.completed {
+            opacity: 0.7;
+        }
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+        }
+        .task-text {
+            font-size: 18px;
+            margin-left: 12px;
+        }
+        .task-actions {
+            display: flex;
+            align-items: center;
+        }
+        .task-label {
+            font-size: 14px;
+            background-color: #dbeafe;
+            color: #1e40af;
+            padding: 4px 8px;
+            border-radius: 9999px;
+            margin-right: 8px;
+        }
+        .task-deadline {
+            font-size: 14px;
+            color: #6b7280;
+            margin-right: 8px;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .progress {
+            margin-top: 24px;
+            text-align: center;
+        }
+        .progress-percentage {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3b82f6;
+        }
+        .progress-text {
+            font-size: 16px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 9999px;
+            margin-top: 12px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            transition: width 0.5s ease-in-out;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 24px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: #000;
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 18px;
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .submit-btn:hover {
+            background-color: #2563eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Hey Jasper</h1>
+        </div>
+        <div class="content">
+            <button class="add-task-btn" id="addTaskBtn">+ Add New Task</button>
+            <ul class="task-list" id="taskList"></ul>
+            <div class="progress">
+                <div class="progress-percentage" id="progressPercentage">0%</div>
+                <div class="progress-text">Tasks Completed</div>
+                <div class="progress-bar">
+                    <div class="progress-bar-fill" id="progressBarFill"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Add New Task</h2>
+            <form id="addTaskForm">
+                <div class="form-group">
+                    <label for="taskInput">Task</label>
+                    <input type="text" id="taskInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="deadlineInput">Deadline</label>
+                    <input type="date" id="deadlineInput">
+                </div>
+                <div class="form-group">
+                    <label for="labelInput">Label</label>
+                    <input type="text" id="labelInput">
+                </div>
+                <button type="submit" class="submit-btn">Add Task</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        const taskList = document.getElementById('taskList');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const addTaskModal = document.getElementById('addTaskModal');
+        const addTaskForm = document.getElementById('addTaskForm');
+        const closeBtn = document.getElementsByClassName('close')[0];
+        const progressPercentage = document.getElementById('progressPercentage');
+        const progressBarFill = document.getElementById('progressBarFill');
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <div>
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${index})">
+                        <span class="task-text">${task.text}</span>
+                    </div>
+                    <div class="task-actions">
+                        ${task.label ? `<span class="task-label">${task.label}</span>` : ''}
+                        ${task.deadline ? `<span class="task-deadline">${formatDate(task.deadline)}</span>` : ''}
+                        <button class="delete-btn" onclick="deleteTask(${index})">×</button>
+                    </div>
+                `;
+                taskList.appendChild(li);
+            });
+            updateProgress();
+        }
+
+        function addTask(text, deadline, label) {
+            tasks.push({ text, completed: false, deadline, label });
+            saveTasks();
+            renderTasks();
+        }
+
+        function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks();
+            renderTasks();
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks();
+        }
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function updateProgress() {
+            const completedTasks = tasks.filter(task => task.completed).length;
+            const totalTasks = tasks.length;
+            const percentage = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
+            progressPercentage.textContent = `${percentage}%`;
+            progressBarFill.style.width = `${percentage}%`;
+        }
+
+        function formatDate(dateString) {
+            const options = { month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        }
+
+        addTaskBtn.onclick = function() {
+            addTaskModal.style.display = "block";
+        }
+
+        closeBtn.onclick = function() {
+            addTaskModal.style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            if (event.target == addTaskModal) {
+                addTaskModal.style.display = "none";
+            }
+        }
+
+        addTaskForm.onsubmit = function(e) {
+            e.preventDefault();
+            const taskInput = document.getElementById('taskInput');
+            const deadlineInput = document.getElementById('deadlineInput');
+            const labelInput = document.getElementById('labelInput');
+            addTask(taskInput.value, deadlineInput.value, labelInput.value);
+            taskInput.value = '';
+            deadlineInput.value = '';
+            labelInput.value = '';
+            addTaskModal.style.display = "none";
+        }
+
+        renderTasks();
+    </script>
+</body>
+</html>
